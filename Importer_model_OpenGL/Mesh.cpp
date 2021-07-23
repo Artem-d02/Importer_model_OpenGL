@@ -26,18 +26,32 @@ namespace msh
 
 			// Получаем номер текстуры (номер N в diffuse_textureN)
 			std::string number;
-			std::string name = textures[i].type;
-			if (name == "texture_diffuse")
+			std::string type = textures[i].type;
+			std::string name_first_part = "material_";
+			std::string name_last_part;
+			if (type == "texture_diffuse")
+			{
 				number = std::to_string(diffuseNr++);
-			else if (name == "texture_specular")
+				name_last_part = ".diffuse";
+			}
+			else if (type == "texture_specular")
+			{
 				number = std::to_string(specularNr++); // конвертируем unsigned int в строку
-			else if (name == "texture_normal")
+				name_last_part = ".specular";
+			}
+			else if (type == "texture_normal")
+			{
 				number = std::to_string(normalNr++); // конвертируем unsigned int в строку
-			else if (name == "texture_height")
+				name_last_part = ".normal";
+			}
+			else if (type == "texture_height")
+			{
 				number = std::to_string(heightNr++); // конвертируем unsigned int в строку
-
+				name_last_part = ".height";
+			}
 			// Теперь устанавливаем сэмплер на нужный текстурный юнит
-			glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+			glUniform1i(glGetUniformLocation(shader.ID, (name_first_part + number + name_last_part).c_str()), i);
+			shader.setFloat(name_first_part + number + std::string(".shininess"), 32.0f);
 			// и связываем текстуру
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}

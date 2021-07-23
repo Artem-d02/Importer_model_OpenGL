@@ -165,7 +165,7 @@ namespace mdl
 			if (!skip)
 			{   // если текстура еще не была загружена, то загружаем её
 				msh::Texture texture;
-				texture.id = TextureFromFile(str.C_Str(), this->directory);
+				texture.id = TextureFromFile(str.C_Str(), directory);
 				texture.type = typeName;
 				texture.path = str.C_Str();
 				textures.push_back(texture);
