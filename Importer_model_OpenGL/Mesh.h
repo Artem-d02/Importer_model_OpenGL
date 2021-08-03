@@ -29,6 +29,16 @@ namespace msh
 
 		// Вектор бинормали (вектор, перпендикулярный касательному вектору и вектору нормали)
 		glm::vec3 Bitangent;
+
+		// Цвета вершины
+		glm::vec4 ColorAmbient;
+
+		glm::vec4 ColorDiffuse;
+
+		glm::vec4 ColorSpecular;
+
+		float shininess;
+
 	};
 
 	struct Texture {

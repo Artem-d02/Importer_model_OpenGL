@@ -26,32 +26,20 @@ namespace msh
 
 			// Получаем номер текстуры (номер N в diffuse_textureN)
 			std::string number;
-			std::string type = textures[i].type;
-			std::string name_first_part = "material_";
-			std::string name_last_part;
-			if (type == "texture_diffuse")
-			{
+			std::string name = textures[i].type;
+			if (name == "texture_diffuse")
 				number = std::to_string(diffuseNr++);
-				name_last_part = ".diffuse";
-			}
-			else if (type == "texture_specular")
-			{
+			else if (name == "texture_specular")
 				number = std::to_string(specularNr++); // конвертируем unsigned int в строку
-				name_last_part = ".specular";
-			}
-			else if (type == "texture_normal")
-			{
+			else if (name == "texture_normal")
 				number = std::to_string(normalNr++); // конвертируем unsigned int в строку
-				name_last_part = ".normal";
-			}
-			else if (type == "texture_height")
-			{
+			else if (name == "texture_height")
 				number = std::to_string(heightNr++); // конвертируем unsigned int в строку
-				name_last_part = ".height";
-			}
+
+
 			// Теперь устанавливаем сэмплер на нужный текстурный юнит
-			glUniform1i(glGetUniformLocation(shader.ID, (name_first_part + number + name_last_part).c_str()), i);
-			shader.setFloat(name_first_part + number + std::string(".shininess"), 32.0f);
+			glUniform1i(glGetUniformLocation(shader.ID, (name + number + std::string(".texture")).c_str()), i);
+			shader.setBool(name + number + std::string(".is_init"), true);
 			// и связываем текстуру
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
@@ -105,6 +93,19 @@ namespace msh
 		// Вектор бинормали вершины
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+
+		// Векторы цвета
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, ColorAmbient));
+
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, ColorDiffuse));
+
+		glEnableVertexAttribArray(7);
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, ColorSpecular));
+
+		glEnableVertexAttribArray(8);
+		glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, shininess));
 
 		glBindVertexArray(0);
 	}

@@ -2,7 +2,7 @@
 
 namespace mdl
 {
-	Model::Model(std::string const& path, bool gamma) : gammaCorrection(gamma)
+	Model::Model(std::string const& path)
 	{
 		loadModel(path);
 	}
@@ -41,7 +41,8 @@ namespace mdl
 			// ”зел содержит только индексы объектов в сцене.
 			// —цена же содержит все данные; узел - это лишь способ организации данных
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(processMesh(mesh, scene));
+			aiMaterial* mtl = scene->mMaterials[mesh->mMaterialIndex];
+			meshes.push_back(processMesh(mesh, scene, mtl));
 		}
 		// ѕосле того, как мы обработали все меши (если таковые имелись), мы начинаем рекурсивно обрабатывать каждый из дочерних узлов
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -51,7 +52,7 @@ namespace mdl
 
 	}
 
-	msh::Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+	msh::Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, const aiMaterial* mtl)
 	{
 		// ƒанные дл€ заполнени€
 		std::vector<msh::Vertex> vertices;
@@ -62,7 +63,7 @@ namespace mdl
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			msh::Vertex vertex;
-			glm::vec3 vector; // мы объ€вл€ем промежуточный вектор, т.к. Assimp использует свой собственный векторный класс, который не преобразуетс€ напр€мую в тип glm::vec3, поэтому сначала мы передаем данные в этот промежуточный вектор типа glm::vec3
+			glm::vec4 vector; // мы объ€вл€ем промежуточный вектор, т.к. Assimp использует свой собственный векторный класс, который не преобразуетс€ напр€мую в тип glm::vec3, поэтому сначала мы передаем данные в этот промежуточный вектор типа glm::vec3
 
 			//  оординаты
 			vector.x = mesh->mVertices[i].x;
@@ -88,19 +89,77 @@ namespace mdl
 				vertex.TexCoords = vec;
 			}
 			else
+			{
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+				//std::cout << "Colors is not found" << std::endl;
+			}
 
-			//  асательный вектор
-			vector.x = mesh->mTangents[i].x;
-			vector.y = mesh->mTangents[i].y;
-			vector.z = mesh->mTangents[i].z;
-			vertex.Tangent = vector;
+			if (mesh->mTangents != nullptr)
+			{
+				//  асательный вектор
+				vector.x = mesh->mTangents[i].x;
+				vector.y = mesh->mTangents[i].y;
+				vector.z = mesh->mTangents[i].z;
+				vertex.Tangent = vector;
+			}
+			else
+			{
+				vertex.Tangent = glm::vec3(0, 0, 0);
+			}
 
-			// ¬ектор бинормали
-			vector.x = mesh->mBitangents[i].x;
-			vector.y = mesh->mBitangents[i].y;
-			vector.z = mesh->mBitangents[i].z;
-			vertex.Bitangent = vector;
+			if (mesh->mBitangents != nullptr)
+			{
+				// ¬ектор бинормали
+				vector.x = mesh->mBitangents[i].x;
+				vector.y = mesh->mBitangents[i].y;
+				vector.z = mesh->mBitangents[i].z;
+				vertex.Bitangent = vector;
+				
+			}
+			else
+			{
+				vertex.Bitangent = glm::vec3(0, 0, 0);
+			}
+
+			aiColor4D ambient;
+			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient))
+			{
+				vector = glm::vec4(ambient.r, ambient.g, ambient.b, ambient.a);
+				//std::cout << vector.x << "\t" << vector.y << "\t" << vector.z << "\t" << vector.w << std::endl;
+				vertex.ColorAmbient = vector;
+			}
+			else
+			{
+				vertex.ColorAmbient = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			}
+
+			aiColor4D diffuse;
+			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
+			{
+				vector = glm::vec4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+				//std::cout << vector.x << "\t" << vector.y << "\t" << vector.z << "\t" << vector.w << std::endl;
+				vertex.ColorDiffuse = vector;
+			}
+			else
+			{
+				vertex.ColorDiffuse = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			}
+
+			aiColor4D specular;
+			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular))
+			{
+				vector = glm::vec4(specular.r, specular.g, specular.b, specular.a);
+				//std::cout << vector.x << "\t" << vector.y << "\t" << vector.z << "\t" << vector.w << std::endl;
+				vertex.ColorSpecular = vector;
+			}
+			else
+			{
+				vertex.ColorSpecular = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			}
+
+			unsigned int max = 1;
+			aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &vertex.shininess, &max);
+
 			vertices.push_back(vertex);
 		}
 		// “еперь проходимс€ по каждой грани меша (грань - это треугольник меша) и извлекаем соответствующие индексы вершин
@@ -139,6 +198,28 @@ namespace mdl
 		std::vector<msh::Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
+		// Find count of different textures
+		/*
+		std::cout << "Different textures count:" << std::endl;
+		std::cout << "AMBIENT:\t\t" << material->GetTextureCount(aiTextureType_AMBIENT) << std::endl;
+		std::cout << "AMBIENT_OCCLUSION:\t" << material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION) << std::endl;
+		std::cout << "BASE_COLOR:\t\t" << material->GetTextureCount(aiTextureType_BASE_COLOR) << std::endl;
+		std::cout << "DIFFUSE:\t\t" << material->GetTextureCount(aiTextureType_DIFFUSE) << std::endl;
+		std::cout << "DIFFUSE_ROUGHNESS:\t" << material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS) << std::endl;
+		std::cout << "DISPLACEMENT:\t\t" << material->GetTextureCount(aiTextureType_DISPLACEMENT) << std::endl;
+		std::cout << "EMISSION_COLOR:\t\t" << material->GetTextureCount(aiTextureType_EMISSION_COLOR) << std::endl;
+		std::cout << "EMISSIVE:\t\t" << material->GetTextureCount(aiTextureType_EMISSIVE) << std::endl;
+		std::cout << "HEIGHT:\t\t\t" << material->GetTextureCount(aiTextureType_HEIGHT) << std::endl;
+		std::cout << "LIGHTMAP:\t\t" << material->GetTextureCount(aiTextureType_LIGHTMAP) << std::endl;
+		std::cout << "METALNESS:\t\t" << material->GetTextureCount(aiTextureType_METALNESS) << std::endl;
+		std::cout << "NORMALS:\t\t" << material->GetTextureCount(aiTextureType_NORMALS) << std::endl;
+		std::cout << "NORMAL_CAMERA:\t\t" << material->GetTextureCount(aiTextureType_NORMAL_CAMERA) << std::endl;
+		std::cout << "OPACITY:\t\t" << material->GetTextureCount(aiTextureType_OPACITY) << std::endl;
+		std::cout << "REFLECTION:\t\t" << material->GetTextureCount(aiTextureType_REFLECTION) << std::endl;
+		std::cout << "SHININESS:\t\t" << material->GetTextureCount(aiTextureType_SHININESS) << std::endl;
+		std::cout << "SPECULAR:\t\t" << material->GetTextureCount(aiTextureType_SPECULAR) << std::endl;
+		std::cout << std::endl;
+		*/
 		// ¬озвращаем меш-объект, созданный на основе полученных данных
 		return msh::Mesh(vertices, indices, textures);
 	}

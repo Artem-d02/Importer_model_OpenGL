@@ -81,7 +81,7 @@ int main()
 	shdr::Shader lightCubeShader("Lamp_vertex_shader.txt", "Lamp_fragment_shader.txt");
 
 	// Загрузка моделей
-	mdl::Model ourModel("./Resources/backpack/backpack.obj");
+	mdl::Model ourModel("./Resources/ac_cobra/AC Cobra/Shelby.obj");	//	./Resources/backpack/backpack.obj	./Resources/ac_cobra/AC Cobra/Shelby.obj	./Resources/ford_raptor/2755_open3dmodel/ford_f150_final.obj
 
 	// Отрисовка в режиме каркаса
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -153,11 +153,6 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	// Конфигурация шейдеров
-	ourShader.use();
-	ourShader.setInt("material.diffuse", 0);
-	ourShader.setInt("material.specular", 1);
-
 	// Цикл рендеринга
 	while (!glfwWindowShouldClose(window))
 	{
@@ -178,7 +173,7 @@ int main()
 
 		auto campos = camera.GetPosition();
 		ourShader.setVec3("viewPos", campos);
-		ourShader.setFloat("material_1.shininess", 32.0f);
+		//ourShader.setFloat("material_1.shininess", 96.0f);
 
 
 		// Направленный свет
