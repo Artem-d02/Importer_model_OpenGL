@@ -81,7 +81,7 @@ int main()
 	shdr::Shader lightCubeShader("Lamp_vertex_shader.txt", "Lamp_fragment_shader.txt");
 
 	// Загрузка моделей
-	mdl::Model ourModel("./Resources/ac_cobra/AC Cobra/Shelby.obj");	//	./Resources/backpack/backpack.obj	./Resources/ac_cobra/AC Cobra/Shelby.obj	./Resources/ford_raptor/2755_open3dmodel/ford_f150_final.obj
+	mdl::Model ourModel("./Resources/backpack/backpack.obj");	//	./Resources/backpack/backpack.obj	./Resources/ac_cobra/AC Cobra/Shelby.obj	./Resources/ford_raptor/2755_open3dmodel/ford_f150_final.obj
 
 	// Отрисовка в режиме каркаса
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
