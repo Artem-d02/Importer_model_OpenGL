@@ -180,7 +180,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 		ambient *= vec3(texture(texture_diffuse1.texture, TexCoords));
 		diffuse *= vec3(texture(texture_diffuse1.texture, TexCoords));
 	}
-	vec3 specular = light.specular * spec * vec3(my_material.ColorSpecular.x, my_material.ColorSpecular.y, my_material.ColorSpecular.z);// * texture(material_1.specular, TexCoords).rrr;
+	vec3 specular = light.specular * spec * vec3(my_material.ColorSpecular.x, my_material.ColorSpecular.y, my_material.ColorSpecular.z);
 	if (texture_specular1.is_init == true)
 		specular *= vec3(texture(texture_specular1.texture, TexCoords).rrr);
 	ambient *= attenuation * intensity;

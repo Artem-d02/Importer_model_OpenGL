@@ -39,7 +39,10 @@ namespace msh
 
 			// Теперь устанавливаем сэмплер на нужный текстурный юнит
 			glUniform1i(glGetUniformLocation(shader.ID, (name + number + std::string(".texture")).c_str()), i);
+
+			// устанавливаем флаг, если текстура инициализирована
 			shader.setBool(name + number + std::string(".is_init"), true);
+
 			// и связываем текстуру
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
@@ -104,6 +107,7 @@ namespace msh
 		glEnableVertexAttribArray(7);
 		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, ColorSpecular));
 
+		// Значение блеска
 		glEnableVertexAttribArray(8);
 		glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, shininess));
 

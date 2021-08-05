@@ -121,6 +121,7 @@ namespace mdl
 				vertex.Bitangent = glm::vec3(0, 0, 0);
 			}
 
+			// Получаем цвета вершин
 			aiColor4D ambient;
 			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient))
 			{
@@ -157,6 +158,7 @@ namespace mdl
 				vertex.ColorSpecular = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 			}
 
+			// Получаем значение блеска вершин
 			unsigned int max = 1;
 			aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &vertex.shininess, &max);
 
